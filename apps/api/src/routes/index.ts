@@ -9,6 +9,7 @@ import favoriteRoutes from './favorite.routes';
 import messageRoutes from './message.routes';
 import savedSearchRoutes from './saved-search.routes';
 import dashboardRoutes from './dashboard.routes';
+import adminRoutes from './admin.routes';
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.use('/favorites', favoriteRoutes);
 router.use('/messages', messageRoutes);
 router.use('/saved-searches', savedSearchRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/admin', adminRoutes);
 router.use('/', imageRoutes);
 
 // Health check
