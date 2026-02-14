@@ -12,6 +12,7 @@ import dashboardRoutes from './dashboard.routes';
 import adminRoutes from './admin.routes';
 import subscriptionRoutes from './subscription.routes';
 import paymentRoutes from './payment.routes';
+import bulkUploadRoutes from './bulk-upload.routes';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/admin', adminRoutes);
 router.use('/subscriptions', subscriptionRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/bulk-upload', bulkUploadRoutes);
 router.use('/', imageRoutes);
 
 // Health check
