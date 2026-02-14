@@ -33,7 +33,9 @@ export function ListingCard({ listing }: ListingCardProps) {
   return (
     <Link
       href={`/listing/${listing.slug}`}
-      className="bg-white rounded-xl border border-border overflow-hidden hover:shadow-lg transition-all duration-200 group block"
+      className={`bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-all duration-200 group block ${
+        listing.isFeatured ? 'border-accent/40 ring-1 ring-accent/20 shadow-sm' : 'border-border'
+      }`}
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">

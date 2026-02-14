@@ -68,6 +68,9 @@ export function Header() {
 
         {/* Actions */}
         <div className="hidden md:flex items-center gap-3">
+          <Link href="/pricing" className="text-sm text-gray-300 hover:text-accent transition-colors">
+            Pricing
+          </Link>
           <Link href="/favorites" className="p-2 hover:text-accent transition-colors">
             <Heart className="w-5 h-5" />
           </Link>

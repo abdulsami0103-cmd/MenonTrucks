@@ -10,6 +10,8 @@ import messageRoutes from './message.routes';
 import savedSearchRoutes from './saved-search.routes';
 import dashboardRoutes from './dashboard.routes';
 import adminRoutes from './admin.routes';
+import subscriptionRoutes from './subscription.routes';
+import paymentRoutes from './payment.routes';
 
 const router = Router();
 
@@ -23,6 +25,8 @@ router.use('/messages', messageRoutes);
 router.use('/saved-searches', savedSearchRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/admin', adminRoutes);
+router.use('/subscriptions', subscriptionRoutes);
+router.use('/payments', paymentRoutes);
 router.use('/', imageRoutes);
 
 // Health check

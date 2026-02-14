@@ -24,7 +24,8 @@
     "slugify": "^1.6.6",
     "@elastic/elasticsearch": "^8.13.0",
     "ioredis": "^5.4.0",
-    "bullmq": "^5.7.0"
+    "bullmq": "^5.7.0",
+    "stripe": "^15.0.0"
   },
   "devDependencies": {
     "@menon/typescript-config": "*",

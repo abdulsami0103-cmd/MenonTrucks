@@ -38,8 +38,14 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
+// Body parsing (skip JSON parsing for Stripe webhook - it needs raw body)
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/subscriptions/webhook') {
+    next();
+  } else {
+    express.json({ limit: '10mb' })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
