@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env';
 import routes from './routes';
+import { createListingIndex } from './services/elasticsearch.service';
 
 const app = express();
 
@@ -63,9 +64,17 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   });
 });
 
-app.listen(env.PORT, () => {
+app.listen(env.PORT, async () => {
   console.log(`🚛 MenonTrucks API running on port ${env.PORT}`);
   console.log(`📍 Environment: ${env.NODE_ENV}`);
+
+  // Initialize Elasticsearch index
+  try {
+    await createListingIndex();
+    console.log('🔍 Elasticsearch index ready');
+  } catch (error) {
+    console.warn('⚠️  Elasticsearch not available, search features disabled');
+  }
 });
 
 export default app;

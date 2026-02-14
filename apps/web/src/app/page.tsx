@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Search, Truck, Container, Tractor, Wrench, CarFront, Bus } from 'lucide-react';
+import { Truck, Container, Tractor, Wrench, CarFront, Bus } from 'lucide-react';
+import { SearchBar } from '@/components/search/search-bar';
 
 const categories = [
   { name: 'Trucks', slug: 'trucks', icon: Truck, count: '15,000+' },
@@ -25,27 +26,9 @@ export default function HomePage() {
             and commercial vehicles. 150,000+ listings worldwide.
           </p>
 
-          {/* Search Bar */}
+          {/* Search Bar with Autocomplete */}
           <div className="bg-white rounded-xl p-4 md:p-6 shadow-2xl max-w-4xl">
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search vehicles, brands, models..."
-                  className="w-full px-4 py-3 rounded-lg border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-accent"
-                />
-              </div>
-              <select className="px-4 py-3 rounded-lg border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-accent">
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat.slug} value={cat.slug}>{cat.name}</option>
-                ))}
-              </select>
-              <button className="bg-accent hover:bg-accent-500 text-white font-semibold px-8 py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
-                <Search className="w-5 h-5" />
-                Search
-              </button>
-            </div>
+            <SearchBar size="lg" />
           </div>
         </div>
       </section>

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Truck, User, Heart, LogIn } from 'lucide-react';
+import { Menu, X, Truck, User, Heart, LogIn, Search } from 'lucide-react';
+import { SearchBar } from '@/components/search/search-bar';
 
 const navLinks = [
   { name: 'Trucks', href: '/category/trucks' },
@@ -48,7 +49,7 @@ export function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-5">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -59,6 +60,11 @@ export function Header() {
             </Link>
           ))}
         </nav>
+
+        {/* Header Search */}
+        <div className="hidden md:block w-64 lg:w-72">
+          <SearchBar size="md" showSuggestions={true} />
+        </div>
 
         {/* Actions */}
         <div className="hidden md:flex items-center gap-3">
