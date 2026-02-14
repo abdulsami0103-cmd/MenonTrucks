@@ -1,0 +1,356 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  SOLD
+  EXPIRED
+  REJECTED
+}
+
+enum ListingCondition {
+  NEW
+  USED
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum MessageStatus {
+  UNREAD
+  READ
+}
+
+// ==========================================
+// USERS
+// ==========================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  phone         String?
+  whatsapp      String?
+  avatar        String?
+  role          UserRole  @default(BUYER)
+  isVerified    Boolean   @default(false)
+  isSuspended   Boolean   @default(false)
+  refreshToken  String?
+
+  // Seller specific
+  companyName   String?
+  companyLogo   String?
+  companyDesc   String?
+  website       String?
+  address       String?
+  city          String?
+  country       String?
+  postalCode    String?
+  latitude      Float?
+  longitude     Float?
+
+  // Relations
+  listings      Listing[]
+  favorites     Favorite[]
+  savedSearches SavedSearch[]
+  sentMessages     Message[]  @relation("SentMessages")
+  receivedMessages Message[]  @relation("ReceivedMessages")
+  subscription  Subscription?
+  payments      Payment[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([role])
+  @@index([email])
+  @@index([isSuspended])
+}
+
+// ==========================================
+// CATEGORIES
+// ==========================================
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  icon        String?
+  image       String?
+  order       Int        @default(0)
+
+  // Hierarchical (parent-child)
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+
+  // Relations
+  listings    Listing[]
+  specifications SpecificationTemplate[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([parentId])
+  @@index([slug])
+}
+
+// ==========================================
+// LISTINGS
+// ==========================================
+
+model Listing {
+  id          String          @id @default(cuid())
+  title       String
+  slug        String          @unique
+  description String?
+  price       Decimal         @db.Decimal(12, 2)
+  currency    String          @default("EUR")
+  condition   ListingCondition @default(USED)
+  status      ListingStatus   @default(DRAFT)
+  isFeatured  Boolean         @default(false)
+  views       Int             @default(0)
+
+  // Vehicle Details
+  brand       String?
+  model       String?
+  year        Int?
+  mileage     Int?
+  fuelType    String?
+  transmission String?
+  power       String?
+  emissionClass String?
+  axles       Int?
+  weight      Decimal?        @db.Decimal(10, 2)
+  color       String?
+  vin         String?
+
+  // Location
+  city        String?
+  country     String?
+  postalCode  String?
+  latitude    Float?
+  longitude   Float?
+
+  // Relations
+  sellerId    String
+  seller      User            @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category        @relation(fields: [categoryId], references: [id])
+  images      Image[]
+  specifications Specification[]
+  favorites   Favorite[]
+  messages    Message[]
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([categoryId, status])
+  @@index([brand, model])
+  @@index([price])
+  @@index([createdAt])
+  @@index([isFeatured])
+  @@index([country])
+}
+
+// ==========================================
+// IMAGES
+// ==========================================
+
+model Image {
+  id          String   @id @default(cuid())
+  url         String
+  thumbnailUrl String?
+  altText     String?
+  order       Int      @default(0)
+  width       Int?
+  height      Int?
+  size        Int?
+
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([listingId])
+}
+
+// ==========================================
+// SPECIFICATIONS (Dynamic per category)
+// ==========================================
+
+model SpecificationTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  key         String
+  type        String   @default("text") // text, number, select, boolean
+  options     String?  // JSON for select options
+  unit        String?
+  required    Boolean  @default(false)
+  order       Int      @default(0)
+
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([categoryId])
+  @@unique([categoryId, key])
+}
+
+model Specification {
+  id          String   @id @default(cuid())
+  key         String
+  value       String
+  label       String?
+
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([listingId])
+  @@unique([listingId, key])
+}
+
+// ==========================================
+// FAVORITES
+// ==========================================
+
+model Favorite {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([userId])
+}
+
+// ==========================================
+// SAVED SEARCHES
+// ==========================================
+
+model SavedSearch {
+  id          String   @id @default(cuid())
+  name        String
+  filters     String   // JSON string of search filters
+  emailAlert  Boolean  @default(true)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ==========================================
+// MESSAGES (Buyer-Seller Communication)
+// ==========================================
+
+model Message {
+  id          String        @id @default(cuid())
+  content     String
+  status      MessageStatus @default(UNREAD)
+
+  senderId    String
+  sender      User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User          @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  listingId   String?
+  listing     Listing?      @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime      @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([listingId])
+}
+
+// ==========================================
+// SUBSCRIPTIONS
+// ==========================================
+
+model Subscription {
+  id              String             @id @default(cuid())
+  plan            SubscriptionPlan   @default(FREE)
+  status          SubscriptionStatus @default(ACTIVE)
+  maxListings     Int                @default(1)
+  featuredListings Int               @default(0)
+  stripeCustomerId String?
+  stripeSubId     String?
+
+  userId          String             @unique
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startDate       DateTime           @default(now())
+  endDate         DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+// ==========================================
+// PAYMENTS
+// ==========================================
+
+model Payment {
+  id              String        @id @default(cuid())
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("EUR")
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?
+  description     String?
+
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([stripePaymentId])
+}
